@@ -5,76 +5,60 @@ services:
     build: ./poll
     ports:
       - "5000:80"
-    environment:
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
     networks:
       - poll-tier
       - back-tier
+    restart: always
     depends_on:
       - redis
+    env_file:
+      - .env
 
   redis:
-    image: redis:7-alpine
-    container_name: redis_queue
-    restart: always
-    ports:
-      - "6379:6379"
+    image: redis:6.2-alpine
     networks:
       - back-tier
+    restart: always
 
   worker:
     build: ./worker
-    environment:
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - POSTGRES_HOST=db
-      - POSTGRES_PORT=5432
-      - POSTGRES_USER=myuser
-      - POSTGRES_PASSWORD=mypassword
-      - POSTGRES_DB=mydatabase
     networks:
       - back-tier
+    restart: always
     depends_on:
       - redis
       - db
+    env_file:
+      - .env
 
   db:
-    image: postgres:15-alpine
-    container_name: postgres_db
-    restart: always
-    environment:
-      - POSTGRES_USER=myuser
-      - POSTGRES_PASSWORD=mypassword
-      - POSTGRES_DB=mydatabase
+    image: postgres:13-alpine
+    env_file:
+      - .env
     volumes:
       - db-data:/var/lib/postgresql/data
-      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql
-    ports:
-      - "5432:5432"
+      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
     networks:
       - back-tier
+    restart: always
 
   result:
     build: ./result
     ports:
       - "5001:80"
-    environment:
-      - POSTGRES_HOST=db
-      - POSTGRES_PORT=5432
-      - POSTGRES_USER=myuser
-      - POSTGRES_PASSWORD=mypassword
-      - POSTGRES_DB=mydatabase
     networks:
       - result-tier
       - back-tier
+    restart: always
     depends_on:
       - db
-
-volumes:
-  db-data:
+    env_file:
+      - .env
 
 networks:
   poll-tier:
   result-tier:
   back-tier:
+
+volumes:
+  db-data:
