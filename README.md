@@ -1,4 +1,4 @@
-# Web Poll Application
+# Projet Docker Popeye
 
 ## Description
 Ce projet est une application de sondage web basée sur Docker et Docker Compose. Il se compose de plusieurs services conteneurisés qui interagissent ensemble :
